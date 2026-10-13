@@ -374,11 +374,13 @@ export function UryDateRangePicker({ value, onChange, className }: UryDateRangeP
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownStyle = useDropdownPosition(isOpen, containerRef, dropdownRef, 300);
 
-  const [viewDate, setViewDate] = useState<Date>(() => value.from ?? new Date());
+  // Open on the month the range ends in, so a range like "last 30 days" opens
+  // on the current month rather than the previous one.
+  const [viewDate, setViewDate] = useState<Date>(() => value.to ?? value.from ?? new Date());
 
   useEffect(() => {
-    setViewDate(value.from ?? new Date());
-  }, [value.from]);
+    setViewDate(value.to ?? value.from ?? new Date());
+  }, [value.to, value.from]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
