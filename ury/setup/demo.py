@@ -556,16 +556,24 @@ def clear_demo_data():
             # Maybe the company is not ending with (Demo) but set in global defaults
             pass
             
+        # URY loads demo data into the user's own company (see
+        # ury.setup.setup_wizard._prepare_demo_company), so only a separate
+        # "(Demo)" company may be deleted; the user's company is kept.
+        deleted_companies = []
         for company in demo_companies:
             try:
                 create_transaction_deletion_record(company)
                 clear_masters(company)
-                delete_company(company)
+                if "(Demo)" in company:
+                    delete_company(company)
+                    deleted_companies.append(company)
+                else:
+                    frappe.db.set_single_value("Global Defaults", "demo_company", "")
             except Exception as e:
                 frappe.log_error(f"Failed to erase demo data for company {company}")
                 
         default_company = frappe.db.get_single_value("Global Defaults", "default_company")
-        if default_company in demo_companies:
+        if default_company in deleted_companies:
             frappe.db.set_default("company", "")
         else:
             frappe.db.set_default("company", default_company)
