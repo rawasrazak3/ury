@@ -46,6 +46,7 @@ page_js = {"point-of-sale": ["public/js/pos_extend.js"]}
 
 # include js in doctype views
 # doctype_js = {"POS Invoive" : "public/js/pos_print.js"}
+doctype_js = {"POS Closing Entry": "public/js/pos_closing_entry.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -126,6 +127,7 @@ ury_demo_transaction_doctypes = [
 # 	"methods": "ury.utils.jinja_methods",
 # 	"filters": "ury.utils.jinja_filters"
 # }
+jinja = {"methods": ["ury.ury.api.ury_closing_print.get_closing_summary"]}
 
 # Installation
 # ------------
@@ -193,7 +195,8 @@ doc_events = {
         },
     "POS Closing Entry": {
         "before_save": "ury.ury.hooks.ury_pos_closing_entry.before_save",
-        "validate":"ury.ury.hooks.ury_pos_closing_entry.validate"
+        "validate":"ury.ury.hooks.ury_pos_closing_entry.validate",
+        "on_submit": "ury.ury.api.ury_closing_print.on_submit",
         },
     "URY Menu Course": {
 		"validate": "ury.ury.api.ury_menu_course_validation.validate_priority",
@@ -434,6 +437,11 @@ fixtures = [
                     "POS Profile-custom_column_break_wwq3q",
                     "POS Profile-custom_table_order_printer",
                     "POS Profile-custom_reprint_kot_format",
+                    "POS Profile-custom_closing_print_section",
+                    "POS Profile-custom_auto_print_closing",
+                    "POS Profile-custom_closing_printer",
+                    "POS Profile-custom_column_break_closing",
+                    "POS Profile-custom_closing_print_format",
                     "Employee-payment_amount",
                     "Employee-payment_type"
                 },
