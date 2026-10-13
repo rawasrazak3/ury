@@ -23,6 +23,8 @@ import { DaywiseSales } from './pages/Reports/DaywiseSales';
 import { DaywiseInvoices } from './pages/Reports/DaywiseInvoices';
 import { MonthWiseSales } from './pages/Reports/MonthWiseSales';
 import { TimeWiseSales } from './pages/Reports/TimeWiseSales';
+import { PeakHourSales } from './pages/Reports/PeakHourSales';
+import { ItemMovement } from './pages/Reports/ItemMovement';
 import { ServiceWiseSales } from './pages/Reports/ServiceWiseSales';
 import { CancelledInvoices } from './pages/Reports/CancelledInvoices';
 import { AverageBillValue } from './pages/Reports/AverageBillValue';
@@ -148,6 +150,8 @@ function App() {
             <Route path="daywise-invoices" element={<DaywiseInvoices />} />
             <Route path="month-wise-sales" element={<MonthWiseSales />} />
             <Route path="time-wise-sales" element={<TimeWiseSales />} />
+            <Route path="peak-hour-sales" element={<PeakHourSales />} />
+            <Route path="item-movement" element={<ItemMovement />} />
             <Route path="service-wise-sales" element={<ServiceWiseSales />} />
             <Route path="cancelled-invoices" element={<CancelledInvoices />} />
             <Route path="average-bill-value" element={<AverageBillValue />} />

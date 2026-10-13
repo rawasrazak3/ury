@@ -17,6 +17,8 @@ import {
   ClipboardList,
   Factory,
   IndianRupee,
+  Flame,
+  ArrowUpDown,
 } from 'lucide-react';
 
 export interface ReportEntry {
@@ -33,11 +35,13 @@ export const reportsRegistry: ReportEntry[] = [
   { id: 'daywise-invoices', label: 'Daywise Invoices', group: 'Sales Summary', path: 'daywise-invoices', icon: Receipt },
   { id: 'month-wise-sales', label: 'Month Wise Sales', group: 'Sales Summary', path: 'month-wise-sales', icon: BarChart3 },
   { id: 'time-wise-sales', label: 'Time Wise Sales', group: 'Sales Summary', path: 'time-wise-sales', icon: Clock },
+  { id: 'peak-hour-sales', label: 'Peak Hour Sales', group: 'Sales Summary', path: 'peak-hour-sales', icon: Flame },
   { id: 'service-wise-sales', label: 'Service Wise Sales', group: 'Sales Summary', path: 'service-wise-sales', icon: PieChart },
   { id: 'cancelled-invoices', label: 'Cancelled Invoices', group: 'Sales Summary', path: 'cancelled-invoices', icon: Ban },
   { id: 'average-bill-value', label: 'Average Bill Value', group: 'Sales Summary', path: 'average-bill-value', icon: Gauge },
 
   { id: 'item-wise-sales', label: 'Item Wise Sales', group: 'Customers & Items', path: 'item-wise-sales', icon: Package },
+  { id: 'item-movement', label: 'Item Movement', group: 'Customers & Items', path: 'item-movement', icon: ArrowUpDown },
   { id: 'item-wise-purchase-history', label: 'Item-wise Purchase History', group: 'Customers & Items', path: 'item-wise-purchase-history', icon: ShoppingCart },
   { id: 'customer-data', label: 'Customer Data', group: 'Customers & Items', path: 'customer-data', icon: Users },
   { id: 'daywise-customer-details', label: 'Daywise Customer Details', group: 'Customers & Items', path: 'daywise-customer-details', icon: UserPlus },
