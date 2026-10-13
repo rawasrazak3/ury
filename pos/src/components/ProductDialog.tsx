@@ -118,7 +118,12 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
   const [selectedAddons, setSelectedAddons] = useState<Array<{ id: string; name: string; price: number }>>(initialAddons);
   const [quantity, setQuantity] = useState<string>(editMode ? initialQuantity?.toString() || '0' : '0');
   const [comments, setComments] = useState<string>(itemToReplace?.comment || '');
+  // Open-price items (e.g. seasonal fish): staff type the price for this line.
+  const [openPriceInput, setOpenPriceInput] = useState<string>(
+    editMode && itemToReplace?.price ? String(itemToReplace.price) : ''
+  );
   const dialogRef = useRef<HTMLDivElement>(null);
+  const priceInputRef = useRef<HTMLInputElement>(null);
 
   // Find existing item in cart based on current selections and comments
   const existingCartItem = selectedItem ? activeOrders.find(
@@ -136,6 +141,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
     if (!editMode && selectedItem) {
       setQuantity('1');
       setComments('');
+      setOpenPriceInput('');
     }
   }, [selectedItem, editMode]);
 
@@ -173,6 +179,22 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
   }, [selectedItem]);
 
 
+  // Lines loaded from a saved order don't carry the flag, so read it from the menu.
+  const selectedOpenPrice = Boolean(
+    selectedItem?.open_price || menuItems.find((m) => m.item === selectedItem?.item)?.open_price
+  );
+  // Open-price items: put the cursor in the Price box so staff can type the
+  // price and press Enter. Deferred a frame because Dialog focuses its first
+  // button when it mounts.
+  useEffect(() => {
+    if (!selectedOpenPrice) return;
+    const frame = requestAnimationFrame(() => {
+      priceInputRef.current?.focus();
+      priceInputRef.current?.select();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selectedItem, selectedOpenPrice]);
+
   // Handle click outside to close dialog
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -203,8 +225,14 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
 
   if (!selectedItem) return null;
 
-  // Always get price from menuItems for the main item
-  const basePrice = selectedItem?.price ? Number(selectedItem.price) : 0;
+  const isOpenPrice = selectedOpenPrice;
+  const enteredPrice = openPriceInput === '' ? 0 : parseFloat(openPriceInput);
+  const isPriceMissing = isOpenPrice && !(enteredPrice > 0);
+
+  // Price comes from the menu, except for open-price items where staff enter it
+  const basePrice = isOpenPrice
+    ? (enteredPrice > 0 ? enteredPrice : 0)
+    : selectedItem?.price ? Number(selectedItem.price) : 0;
   const numericQuantity = quantity === '' ? 0 : parseFloat(quantity);
   const addonsTotal = selectedAddons.reduce((sum, addon) => sum + addon.price, 0);
   const total = (basePrice + addonsTotal) * numericQuantity;
@@ -241,6 +269,9 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
     if (isNaN(numericQuantity) || numericQuantity <= 0) {
       return; // Don't add to order if quantity is 0 or invalid
     }
+    if (isPriceMissing) {
+      return; // Open-price items need a price before they go on the order
+    }
 
     if (editMode && itemToReplace?.uniqueId) {
       // Remove the old item first
@@ -253,6 +284,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
       ...selectedItem,
       quantity: numericQuantity,
       price: basePrice,
+      open_price: isOpenPrice ? 1 : 0,
       comment: trimmedComment || undefined
     };
     addToOrder(orderItem);
@@ -365,6 +397,33 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
             </div>
           </div>
 
+          {isOpenPrice && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">{t('product_dialog.price')}</h3>
+              <Input
+                type="number"
+                inputMode="decimal"
+                min="0"
+                ref={priceInputRef}
+                placeholder={t('product_dialog.enter_price')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddToOrder();
+                  }
+                }}
+                value={openPriceInput}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  if (/^\d*\.?\d*$/.test(e.target.value)) setOpenPriceInput(e.target.value);
+                }}
+                className="w-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              {isPriceMissing && (
+                <p className="mt-1 text-sm text-red-600">{t('product_dialog.price_required')}</p>
+              )}
+            </div>
+          )}
+
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-3">{t('product_dialog.special_instructions')}</h3>
             <Input
@@ -392,6 +451,12 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
                 max="99"
                 value={quantity}
                 onChange={(e) => handleQuantityChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddToOrder();
+                  }
+                }}
                 onBlur={() => {
                   // If empty on blur, set to 0
                   if (quantity === '') {
@@ -483,7 +548,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({
               onClick={handleAddToOrder}
               className="w-full mt-4"
               size="lg"
-              disabled={numericQuantity === 0}
+              disabled={numericQuantity === 0 || isPriceMissing}
             >
               {editMode || existingCartItem ? t('product_dialog.update_order') : t('product_dialog.add_to_order')}
             </Button>

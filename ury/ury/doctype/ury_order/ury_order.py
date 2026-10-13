@@ -853,13 +853,23 @@ def price_items_for_invoice(items, price_list, pos_profile, branch, menu):
 
     for d in items:
 
-        course = frappe.db.get_value("URY Menu Item", {"item": d.get("item"), "parent": menu}, "course")
+        course, open_price = frappe.db.get_value(
+            "URY Menu Item", {"item": d.get("item"), "parent": menu}, ["course", "open_price"]
+        ) or (None, 0)
 
         item_prices = frappe.db.get_list(
             "Item Price",
             filters={"item_code": d.get("item"), "price_list": price_list},
             fields=["price_list_rate"],
         )
+
+        if open_price:
+            # Open-price items (e.g. seasonal fish) take the price staff
+            # entered on the POS; every other item stays on the menu price.
+            rate = flt(d.get("rate"))
+            if rate <= 0:
+                frappe.throw(_("Enter a price for {0}.").format(d.get("item_name") or d.get("item")))
+            item_prices = [frappe._dict(price_list_rate=rate)]
 
         if not item_prices:
             frappe.throw(_("No item price found for Item: {0} in Price List: {1}. Please check the price list settings.").format(d.get("item"), price_list))

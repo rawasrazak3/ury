@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { cn } from '@ury/ui';
 import { formatCurrency } from '@ury/core';
+import { t } from '../i18n';
 
 interface MenuCardProps {
   id: string;
@@ -11,6 +12,8 @@ interface MenuCardProps {
   item: string;
   onClick?: () => void;
   disabled?: boolean;
+  /** Price is entered when ordering, so show a hint instead of the menu rate. */
+  openPrice?: boolean;
 }
 
 const MenuCard: FC<MenuCardProps> = ({ 
@@ -19,7 +22,8 @@ const MenuCard: FC<MenuCardProps> = ({
   item_image, 
   course, 
   onClick,
-  disabled 
+  disabled,
+  openPrice
 }) => {
   return (
     <div
@@ -75,7 +79,7 @@ const MenuCard: FC<MenuCardProps> = ({
         {/* Price section - pushed to bottom */}
         <div className="mt-auto pt-2">
           <span className="text-sm font-semibold text-gray-900 tabular-nums">
-            {formatCurrency(price)}
+            {openPrice ? t('menu.price_on_order') : formatCurrency(price)}
           </span>
         </div>
       </div>

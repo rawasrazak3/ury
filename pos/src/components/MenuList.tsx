@@ -74,6 +74,7 @@ const MenuList: React.FC<MenuListProps> = ({ onItemClick }) => {
                 id={item.id}
                 name={item.name}
                 price={item.price}
+                openPrice={Boolean(item.open_price)}
                 item_image={item.image}
                 course={item.course_label || item.course}
                 item={item.item}

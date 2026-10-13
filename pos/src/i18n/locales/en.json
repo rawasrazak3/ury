@@ -33,7 +33,8 @@
     "logout": "Logout"
   },
   "menu": {
-    "special_items": "Special Items"
+    "special_items": "Special Items",
+    "price_on_order": "Enter price"
   },
   "pos_sidebar": {
     "categories": "Categories",
@@ -411,7 +412,10 @@
     "no_addons": "No add ons",
     "total": "Total",
     "update_order": "Update Order",
-    "add_to_order": "Add to Order"
+    "add_to_order": "Add to Order",
+    "price": "Price",
+    "enter_price": "Enter price",
+    "price_required": "Enter the price for this item"
   },
   "order_types": {
     "dine_in": "Dine In",

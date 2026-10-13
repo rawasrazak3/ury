@@ -39,7 +39,8 @@
         "logout": "تسجيل الخروج"
     },
     "menu": {
-        "special_items": "أصناف مميزة"
+        "special_items": "أصناف مميزة",
+        "price_on_order": "أدخل السعر"
     },
     "pos_sidebar": {
         "categories": "فئات",
@@ -226,7 +227,10 @@
         "no_addons": "لا توجد إضافات",
         "total": "الإجمالي",
         "update_order": "تحديث الطلب",
-        "add_to_order": "إضافة إلى الطلب"
+        "add_to_order": "إضافة إلى الطلب",
+        "price": "السعر",
+        "enter_price": "أدخل السعر",
+        "price_required": "أدخل سعر هذا الصنف"
     },
     "order_types": {
         "dine_in": "طلب محلي",

@@ -80,7 +80,7 @@ def resolve_restaurant_menu(branch, room=None, order_type=None, cashier=False):
     menu_items = frappe.get_all(
         "URY Menu Item",
         filters={"parent": menu, "disabled": 0},
-        fields=["item", "item_name", "rate", "special_dish", "disabled", "course"],
+        fields=["item", "item_name", "rate", "special_dish", "open_price", "disabled", "course"],
         order_by="item_name asc"
     )
 
@@ -90,6 +90,7 @@ def resolve_restaurant_menu(branch, room=None, order_type=None, cashier=False):
             "item_name": _(item.item_name) if item.item_name else item.item_name,
             "rate": item.rate,
             "special_dish": item.special_dish,
+            "open_price": item.open_price,
             "disabled": item.disabled,
             "item_image": frappe.db.get_value("Item", item.item, "image"),
             "course": item.course,

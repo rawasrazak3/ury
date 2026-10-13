@@ -36,7 +36,14 @@ export default function POS() {
 
   const handleItemClick = (item: any) => {
     if (isMenuInteractionDisabled()) return;
-    
+
+    // Open-price items always go through the dialog so the price gets entered
+    if (item.open_price) {
+      setSelectedItem(item);
+      setIsDialogOpen(true);
+      return;
+    }
+
     clickCountRef.current += 1;
     
     if (clickTimerRef.current) {

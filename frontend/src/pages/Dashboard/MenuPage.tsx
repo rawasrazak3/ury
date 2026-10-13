@@ -22,6 +22,8 @@ interface MenuItemRecord {
   rate?: number;
   image?: string;
   special_dish?: number;
+  /** Staff enter the price on the POS when ordering (e.g. seasonal fish). */
+  open_price?: number;
   disabled?: number;
 }
 
@@ -70,6 +72,7 @@ export const MenuPage: React.FC = () => {
     is_adding_new_course: false,
     target_menu: '',
     special_dish: false,
+    open_price: false,
     disabled: false,
   });
 
@@ -201,6 +204,7 @@ export const MenuPage: React.FC = () => {
       is_adding_new_course: false,
       target_menu: selectedMenu === 'all' ? (menus[0]?.name || '') : selectedMenu,
       special_dish: false,
+      open_price: false,
       disabled: false,
     });
     setDrawerMode('add-item');
@@ -229,6 +233,7 @@ export const MenuPage: React.FC = () => {
       is_adding_new_course: false,
       target_menu: selectedMenu === 'all' ? (menus[0]?.name || '') : selectedMenu,
       special_dish: !!item.special_dish,
+      open_price: !!item.open_price,
       disabled: !!item.disabled,
     });
     setDrawerMode('edit-item');
@@ -377,7 +382,7 @@ export const MenuPage: React.FC = () => {
 
   const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.item_name || !newItem.rate) return;
+    if (!newItem.item_name || (!newItem.rate && !newItem.open_price)) return;
     if (creatingItemForRowIndex === null && !newItem.target_menu) return;
 
     // Ensure image is a valid URL and not raw base64 data
@@ -416,10 +421,11 @@ export const MenuPage: React.FC = () => {
           return;
         }
         menuDoc.items[rowIndex].item_name = newItem.item_name;
-        menuDoc.items[rowIndex].rate = parseFloat(newItem.rate);
+        menuDoc.items[rowIndex].rate = (parseFloat(newItem.rate) || 0);
         menuDoc.items[rowIndex].course = resolvedCourse;
         menuDoc.items[rowIndex].image = sanitizedImage || undefined;
         menuDoc.items[rowIndex].special_dish = newItem.special_dish ? 1 : 0;
+        menuDoc.items[rowIndex].open_price = newItem.open_price ? 1 : 0;
         menuDoc.items[rowIndex].disabled = newItem.disabled ? 1 : 0;
         await call('frappe.client.save', { doc: menuDoc });
 
@@ -431,7 +437,7 @@ export const MenuPage: React.FC = () => {
               fieldname: {
                 image: sanitizedImage,
                 custom_course: resolvedCourse,
-                standard_rate: parseFloat(newItem.rate),
+                standard_rate: (parseFloat(newItem.rate) || 0),
               },
             });
           } catch (err) {
@@ -446,7 +452,7 @@ export const MenuPage: React.FC = () => {
             item_name: newItem.item_name,
             item_group: 'All Item Groups',
             stock_uom: 'Nos',
-            standard_rate: parseFloat(newItem.rate),
+            standard_rate: (parseFloat(newItem.rate) || 0),
             is_sales_item: 1,
             is_stock_item: 0,
             custom_course: resolvedCourse,
@@ -477,9 +483,10 @@ export const MenuPage: React.FC = () => {
             item: createdItem.name,
             item_name: newItem.item_name,
             course: resolvedCourse,
-            rate: parseFloat(newItem.rate),
+            rate: (parseFloat(newItem.rate) || 0),
             image: sanitizedImage || undefined,
             special_dish: newItem.special_dish ? 1 : 0,
+            open_price: newItem.open_price ? 1 : 0,
             disabled: newItem.disabled ? 1 : 0,
           });
           await call('frappe.client.save', { doc: menuDoc });
@@ -860,6 +867,7 @@ export const MenuPage: React.FC = () => {
                 <th className="px-6 py-4">Course</th>
                 <th className="px-6 py-4">Standard Rate</th>
                 <th className="px-6 py-4 text-center">Special</th>
+                <th className="px-6 py-4 text-center">Open Price</th>
                 <th className="px-6 py-4 text-center">Disabled</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -894,6 +902,11 @@ export const MenuPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex justify-center">
                       {item.special_dish ? <Check className="w-4 h-4 text-green-500" /> : <X className="w-4 h-4 text-gray-300" />}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-center">
+                      {item.open_price ? <Check className="w-4 h-4 text-amber-500" /> : <X className="w-4 h-4 text-gray-300" />}
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -1024,14 +1037,19 @@ export const MenuPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block font-semibold text-gray-700 mb-1.5">Standard Rate (₹) <span className="text-red-500">*</span></label>
+            <label className="block font-semibold text-gray-700 mb-1.5">
+              Standard Rate (₹) {!newItem.open_price && <span className="text-red-500">*</span>}
+            </label>
             <Input
               type="number"
               value={newItem.rate}
               onChange={(e) => setNewItem({ ...newItem, rate: e.target.value })}
-              required
+              required={!newItem.open_price}
               className="font-medium"
             />
+            {newItem.open_price && (
+              <p className="mt-1 text-xs text-gray-500">Open Price is on, so staff enter the price on the POS when ordering.</p>
+            )}
           </div>
 
           <div className="flex items-center gap-6 pt-2">
@@ -1046,6 +1064,19 @@ export const MenuPage: React.FC = () => {
                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
               </div>
               <span className="text-sm font-medium text-gray-700">Special Dish</span>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer" title="Staff enter the price on the POS when ordering (e.g. seasonal fish)">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={newItem.open_price}
+                  onChange={(e) => setNewItem({ ...newItem, open_price: e.target.checked })}
+                />
+                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Open Price</span>
             </label>
             
             <label className="flex items-center gap-3 cursor-pointer">
@@ -1145,6 +1176,7 @@ export const MenuPage: React.FC = () => {
                               is_adding_new_course: false,
                               target_menu: '',
                               special_dish: false,
+                              open_price: false,
                               disabled: false,
                             });
                             setDrawerMode('add-item');

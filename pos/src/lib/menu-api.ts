@@ -12,6 +12,7 @@ export interface MenuItem {
   recommended?: boolean;
   description?: string;
   special_dish?: 1 | 0;
+  open_price?: 1 | 0;
 }
 
 export interface GetMenuResponse {

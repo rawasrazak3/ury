@@ -30,6 +30,8 @@ export interface MenuItem extends Omit<APIMenuItem, 'rate' | 'item_image'> {
   quantity?: number;
   description?: string;
   special_dish?: 1 | 0;
+  /** Price is entered by staff when the item is added (e.g. seasonal fish). */
+  open_price?: 1 | 0;
   category?: string;
   variants?: Array<{ id: string; name: string; price: number }>;
   addons?: Array<{ id: string; name: string; price: number; category: 'sides' | 'drinks' | 'desserts' }>;
@@ -217,7 +219,9 @@ const generateUniqueId = (item: OrderItem): string => {
   const variantId = item.selectedVariant?.id || 'default';
   const addonIds = item.selectedAddons?.map(addon => addon.id).sort().join('-') || 'no-addons';
   const commentStr = item.comment ? item.comment.trim() : '';
-  return `${item.id}-${variantId}-${addonIds}-${commentStr}`;
+  // Open-price lines at different prices must stay separate cart lines.
+  const priceStr = item.open_price ? `-${item.price}` : '';
+  return `${item.id}-${variantId}-${addonIds}-${commentStr}${priceStr}`;
 };
 
 const calculateItemPrice = (item: OrderItem): number => {
@@ -238,6 +242,7 @@ export const generateCartHash = (state: Partial<POSState>) => {
       variantId: i.selectedVariant?.id ?? null,
       addonIds: i.selectedAddons?.map(a => a.id).sort() ?? [],
       comment: i.comment ?? '',
+      price: i.price,
     }))
     // Sort by itemId so order in array doesn't produce false positives.
     .sort((a, b) => (a.itemId > b.itemId ? 1 : a.itemId < b.itemId ? -1 : 0));
@@ -427,6 +432,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
         course_label: item.course_label || item.course,
         description: item.description || '',
         special_dish: item.special_dish || 0,
+        open_price: item.open_price || 0,
         tax_rate: 0,
       }));
 
